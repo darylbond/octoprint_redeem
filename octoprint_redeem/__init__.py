@@ -5,15 +5,17 @@ from __future__ import absolute_import
 import logging
 import json
 import datetime
-import json
 import os, errno
 from os import listdir, unlink
 from os.path import isfile, join, isdir
 
 import flask
-
+from octoprint.server.util.flask import redirect_to_tornado, restricted_access
+from octoprint.server import NO_CONTENT, admin_permission
 import octoprint.plugin
 import octoprint.settings
+import time
+
 
 from .operate import Operate
 
@@ -23,7 +25,8 @@ class RedeemPlugin(
         octoprint.plugin.StartupPlugin, 
         octoprint.plugin.AssetPlugin,
         octoprint.plugin.BlueprintPlugin, 
-        octoprint.plugin.SimpleApiPlugin):
+        octoprint.plugin.SimpleApiPlugin, 
+        octoprint.plugin.OctoPrintPlugin):
   
     def __init__(self):
         self._logger = logging.getLogger("octoprint.plugins.redeem")
@@ -57,12 +60,14 @@ class RedeemPlugin(
             get_profiles = [],
             use_profile = [],
             delete_profile = [], 
-            restart_redeem = []
+            restart_redeem = [], 
+            reset_alarm = []
         )
 
     def on_api_command(self, command, data):
         o = Operate()
         if command == "get_profiles":
+            self._logger.exception("get_profiles")
             printers = o.get_printers()
             default = o.get_default_printer()
             profiles = {}
@@ -72,7 +77,10 @@ class RedeemPlugin(
                     "displayName": key,
                     "description": key,
                     "default": printer == default,
-                    "resource": ""
+                    "refs": {
+                        "resource": flask.url_for("plugin.redeem.download_profile", filename=printer, _external=True),
+				        "download": flask.url_for("index", _external=True) + "plugin/redeem/download/" + printer
+                    }
                 }
             return flask.jsonify(**profiles)
         elif command == "use_profile":
@@ -91,8 +99,24 @@ class RedeemPlugin(
             o.restart_redeem()
             return flask.jsonify(ok=1)
 
+        elif command == "reset_alarm":
+            o.reset_alarm()
+            return flask.jsonify(ok=1)
+        else:
+            self._logger.info("Unknown command: '"+str(line)+"'")
+
     def on_api_get(self, request):
         return flask.jsonify(foo="bar")
+
+    @octoprint.plugin.BlueprintPlugin.route("/profiles/<filename>", methods=["GET"])
+    #@restricted_access
+    #@admin_permission.require(403)
+    def download_profile(filename):
+        #self._logger.exception("downloadFile")
+        return redirect_to_tornado(request, url_for("index") + "downloads/profiles/" + filename)
+        #r = flask.make_response(flask.jsonify(result), 201)
+        #r.headers["Location"] = result["resource"]
+        #return r
 
 
     ##~~ BlueprintPlugin API
@@ -159,6 +183,37 @@ class RedeemPlugin(
         r.headers["Location"] = result["resource"]
         return r
 
+
+    def custom_action_handler(self, comm, line, action, *args, **kwargs):
+        #self._logger.info("Received action from printer: '"+str(action)+"'"+str(comm)+" "+str(line))
+
+        [action, message] = action.split("@")
+
+        if action[:6] == "alarm_":
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message}))
+        elif action == "filament_sensor":
+            timeUTC = int(time.time())
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message, "time": str(timeUTC)}))        
+        elif action == "display_message":
+            timeUTC = int(time.time())
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message, "time": str(timeUTC)}))                    
+        else:
+            self._logger.info("Unknown command: '"+str(line)+"'")
+
+
+    def route_hook(self, server_routes, *args, **kwargs):
+        from octoprint.server.util.tornado import LargeResponseHandler, path_validation_factory
+        from octoprint.util import is_hidden_path
+
+        return [
+            (r"/download/(.*)", LargeResponseHandler, dict(path=self._settings.get(["path"]),
+                                                           as_attachment=True,
+                                                           path_validation=path_validation_factory(lambda path: not is_hidden_path(path),
+                                                                                                   status_code=404)))
+        ]
+
+
+
 def _check_config_file(config_file):
     import ConfigParser
     import logging
@@ -193,4 +248,15 @@ def _sanitize_name(name):
 	return sanitized_name.lower()
 
 __plugin_name__ = "Redeem Plugin"
-__plugin_implementation__ = RedeemPlugin()
+
+def __plugin_load__():
+    plugin = RedeemPlugin()
+
+    global __plugin_implementation__
+    __plugin_implementation__ = plugin
+
+    global __plugin_hooks__
+    __plugin_hooks__ = {
+        "octoprint.comm.protocol.action": plugin.custom_action_handler, 
+        "octoprint.server.http.routes": plugin.route_hook
+    }

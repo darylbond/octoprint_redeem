@@ -5,6 +5,8 @@ $(function() {
         self.loginState = parameters[0];
         self.settingsViewModel = parameters[1];
 
+        self.popup = undefined;
+
         self.fileName = ko.observable();
 
         self.placeholderName = ko.observable();
@@ -106,10 +108,6 @@ $(function() {
         });
 
         self.removeProfile = function(data) {
-            if (!data.resource) {
-                return;
-            }
-
             self.profiles.removeItem(function(item) {
                 return (item.key == data.key);
             });
@@ -130,10 +128,6 @@ $(function() {
         };
 
         self.makeProfileDefault = function(data) {
-            if (!data.resource) {
-                return;
-            }
-
             _.each(self.profiles.items(), function(item) {
                 item.isdefault(false);
             });
@@ -199,7 +193,10 @@ $(function() {
                     name: ko.observable(data[key].displayName),
                     description: ko.observable(data[key].description),
                     isdefault: ko.observable(data[key].default),
-                    resource: ko.observable(data[key].resource)
+                    refs: {
+                        resource: ko.observable(data[key].refs.resource),
+                        download: ko.observable(data[key].refs.download)
+                    }
                 });
             });
             self.profiles.updateItems(profiles);
@@ -211,6 +208,219 @@ $(function() {
         };
 
         self.onAfterBinding = function () {
+        };
+
+        self.removeThermistorPopups = function(){
+            console.log("Remove popups");
+            self._closePopup();
+        };
+
+        // Reset the thermistor alarm
+        self.resetThermistorAlarm = function() {
+            $.ajax({
+                url:  API_BASEURL + "plugin/redeem",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    command: "reset_alarm"
+                }),
+                success: function() {
+                    self.removeThermistorPopups();
+                }
+            });
+        };
+
+        self._showPopup = function(options, eventListeners) {
+            self._closePopup();
+            self.popup = new PNotify(options);
+            if (eventListeners) {
+                var popupObj = self.popup.get();
+                _.each(eventListeners, function(value, key) {
+                    popupObj.on(key, value);
+                })
+            }
+        };
+
+        self._updatePopup = function(options) {
+            if (self.popup === undefined) {
+                self._showPopup(options);
+            } else {
+                self.popup.update(options);
+            }
+        };
+
+        self._closePopup = function() {
+            if (self.popup !== undefined) {
+                self.popup.remove();
+            }
+        };
+
+
+        self.onDataUpdaterPluginMessage = function(plugin, data) {
+            if (plugin != "redeem") {
+                return;
+            }
+
+            var messageType = data.type;
+            var messageData = data.data;
+
+            var options = undefined;
+
+            console.log(JSON.stringify(messageData));
+
+            switch (messageType) {
+                case "alarm_thermistor_error":{
+                    options = {
+                        title:  "Thermistor error!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        confirm: {
+                            confirm: true,
+                            buttons: [{
+                                text: gettext("Reset alarm"),
+                                click: function () {
+                                    self.resetThermistorAlarm();
+                                }
+                            }]
+                        },
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        }
+                    };
+                    break;
+                }
+                case "alarm_heater_too_cold":{
+                    options = {
+                        title: "Heater too cold!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        confirm: {
+                            confirm: true,
+                            buttons: [{
+                                text: gettext("Reset alarm"),
+                                click: function () {
+                                    self.resetThermistorAlarm();
+                                }
+                            }]
+                        },
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        }
+                    };
+                    break;
+                }
+                case "alarm_heater_too_hot":{
+                    options = {
+                        title: "Heater too hot!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        confirm: {
+                            confirm: true,
+                            buttons: [{
+                                text: gettext("Reset alarm"),
+                                click: function () {
+                                    self.resetThermistorAlarm();
+                                }
+                            }]
+                        },
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        }
+                    };
+                    break;
+                }
+                case "alarm_heater_rising_fast":{
+                    options = {
+                        title: "Heater rising too fast!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        confirm: {
+                            confirm: true,
+                            buttons: [{
+                                text: gettext("Reset alarm"),
+                                click: function () {
+                                    self.resetThermistorAlarm();
+                                }
+                            }]
+                        },
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        }
+                    };
+                    break;
+                }
+                case "alarm_heater_falling_fast":{
+                    options = {
+                        title: "Heater falling fast!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        confirm: {
+                            confirm: true,
+                            buttons: [{
+                                text: gettext("Reset alarm"),
+                                click: function () {
+                                    self.resetThermistorAlarm();
+                                }
+                            }]
+                        },
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        },
+                    };
+                    break;
+                }
+                case "alarm_stepper_fault":{
+                    options = {
+                        title: "Stepper fault!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        }
+                    };
+                    break;
+                }
+                case "alarm_filament_jam":{
+                    options = {
+                        title: "Filament Jam!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        buttons: {
+                            closer: true,
+                            sticker: true
+                        }
+                    };
+                    break;
+                }
+                case "alarm_operational":{
+                    options = {
+                        title: "Redeem operational",
+                        text: messageData.message,
+                        type: "info"
+                    };
+                    break;
+                }
+                case "filament_sensor":{
+                    break;
+                }
+            }
+            if(options !== undefined){ 
+                self._showPopup(options);
+            }
         };
     }
 

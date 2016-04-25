@@ -60,5 +60,7 @@ class Operate:
         subprocess.call("sudo systemctl restart redeem.service", shell=True)
 
 
-
+    def reset_alarm(self):
+        # Send M562 to reset the thermistor alarm
+        subprocess.call("echo 'M562' > /dev/testing_noret_1", shell=True)
 
