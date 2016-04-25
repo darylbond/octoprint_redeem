@@ -53,6 +53,16 @@ class Operate:
             return True
         return False        
 
+    def get_local(self, filename):
+        with open(filename, "r+") as f:
+            return f.read()
+
+    def save_local(self, data, filename):
+        logging.info(data)
+        with open(filename, "w+") as f:
+            f.write(data)
+        
+
     def restart_redeem(self):
         # Octo will need to have sudo privileges to restart redeem for this to work. 
         # Add "%octo ALL=NOPASSWD: /bin/systemctl restart redeem.service" to /etc/sudoers

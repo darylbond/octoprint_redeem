@@ -21,6 +21,8 @@ $(function() {
         self.uploadElement = $("#settings-redeem-import");
         self.uploadButton = $("#settings-redeem-import-start");
 
+        self.saveButton = $("#settings-redeem-editor-save");
+
         self.profiles = new ItemListHelper(
             "plugin_redeem_profiles",
             {
@@ -157,6 +159,39 @@ $(function() {
         self.showImportProfileDialog = function() {
             $("#settings_plugin_redeem_import").modal("show");
         };
+
+        self.showEditLocalDialog = function() {
+            $.ajax({
+                url:  API_BASEURL + "plugin/redeem",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    command: "get_local"
+                }),
+                success: function(data) {
+                    $("#settings_plugin_redeem_textarea").val(data["data"]);
+                }
+            });
+            $("#settings_plugin_redeem_editor").modal("show");
+        };
+
+        self.saveLocal = function() {
+            $.ajax({
+                url:  API_BASEURL + "plugin/redeem",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    command: "save_local", 
+                    data: $("#settings_plugin_redeem_textarea").val()
+                }),
+                success: function() {
+                    $("#settings_plugin_redeem_editor").modal("hide");
+                }
+            });
+        };
+
 
         self.restartRedeem = function() {
             $.ajax({

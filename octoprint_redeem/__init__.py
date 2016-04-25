@@ -10,8 +10,7 @@ from os import listdir, unlink
 from os.path import isfile, join, isdir
 
 import flask
-from octoprint.server.util.flask import redirect_to_tornado, restricted_access
-from octoprint.server import NO_CONTENT, admin_permission
+from octoprint.server.util.flask import redirect_to_tornado
 import octoprint.plugin
 import octoprint.settings
 import time
@@ -61,7 +60,9 @@ class RedeemPlugin(
             use_profile = [],
             delete_profile = [], 
             restart_redeem = [], 
-            reset_alarm = []
+            reset_alarm = [], 
+            get_local = [],
+            save_local = []
         )
 
     def on_api_command(self, command, data):
@@ -88,19 +89,24 @@ class RedeemPlugin(
             if(o.choose_printer(filename)):
                 return flask.jsonify(ok=1)
             return flask.jsonify(ok=0)            
-
         elif command == "delete_profile":
             filename = data["key"]
             if(o.delete_printer(filename)):
                 return flask.jsonify(ok=1)
             return flask.jsonify(ok=0)
-
         elif command == "restart_redeem":
             o.restart_redeem()
             return flask.jsonify(ok=1)
-
         elif command == "reset_alarm":
             o.reset_alarm()
+            return flask.jsonify(ok=1)
+        elif command == "get_local":
+            filename = os.path.join(self._settings.get(["path"]),"local.cfg")
+            data = o.get_local(filename)
+            return flask.jsonify(data=data)
+        elif command == "save_local":
+            filename = os.path.join(self._settings.get(["path"]),"local.cfg")
+            o.save_local(data["data"], filename)
             return flask.jsonify(ok=1)
         else:
             self._logger.info("Unknown command: '"+str(line)+"'")
@@ -109,14 +115,8 @@ class RedeemPlugin(
         return flask.jsonify(foo="bar")
 
     @octoprint.plugin.BlueprintPlugin.route("/profiles/<filename>", methods=["GET"])
-    #@restricted_access
-    #@admin_permission.require(403)
     def download_profile(filename):
-        #self._logger.exception("downloadFile")
         return redirect_to_tornado(request, url_for("index") + "downloads/profiles/" + filename)
-        #r = flask.make_response(flask.jsonify(result), 201)
-        #r.headers["Location"] = result["resource"]
-        #return r
 
 
     ##~~ BlueprintPlugin API
