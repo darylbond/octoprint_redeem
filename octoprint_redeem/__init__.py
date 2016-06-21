@@ -21,18 +21,18 @@ from .operate import Operate
 class RedeemPlugin(
         octoprint.plugin.TemplatePlugin,
         octoprint.plugin.SettingsPlugin,
-        octoprint.plugin.StartupPlugin, 
+        octoprint.plugin.StartupPlugin,
         octoprint.plugin.AssetPlugin,
-        octoprint.plugin.BlueprintPlugin, 
-        octoprint.plugin.SimpleApiPlugin, 
+        octoprint.plugin.BlueprintPlugin,
+        octoprint.plugin.SimpleApiPlugin,
         octoprint.plugin.OctoPrintPlugin):
-  
+
     def __init__(self):
         self._logger = logging.getLogger("octoprint.plugins.redeem")
 
     #~~ StartupPlugin
     def on_after_startup(self):
-        self.path   = self._settings.get(["path"]) 
+        self.path   = self._settings.get(["path"])
 
     #~~ SettingsPlugin
     def on_settings_save(self, data):
@@ -58,9 +58,9 @@ class RedeemPlugin(
         return dict(
             get_profiles = [],
             use_profile = [],
-            delete_profile = [], 
-            restart_redeem = [], 
-            reset_alarm = [], 
+            delete_profile = [],
+            restart_redeem = [],
+            reset_alarm = [],
             get_local = [],
             save_local = []
         )
@@ -68,11 +68,10 @@ class RedeemPlugin(
     def on_api_command(self, command, data):
         o = Operate()
         if command == "get_profiles":
-            self._logger.exception("get_profiles")
             printers = o.get_printers()
             default = o.get_default_printer()
             profiles = {}
-            for printer in printers:                
+            for printer in printers:
                 key, _ = os.path.splitext(printer)
                 profiles[printer] = {
                     "displayName": key,
@@ -88,7 +87,7 @@ class RedeemPlugin(
             filename = data["key"]
             if(o.choose_printer(filename)):
                 return flask.jsonify(ok=1)
-            return flask.jsonify(ok=0)            
+            return flask.jsonify(ok=0)
         elif command == "delete_profile":
             filename = data["key"]
             if(o.delete_printer(filename)):
@@ -193,10 +192,19 @@ class RedeemPlugin(
             self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message}))
         elif action == "filament_sensor":
             timeUTC = int(time.time())
-            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message, "time": str(timeUTC)}))        
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message, "time": str(timeUTC)}))
         elif action == "display_message":
             timeUTC = int(time.time())
-            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message, "time": str(timeUTC)}))                    
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message, "time": str(timeUTC)}))
+        elif action == "bed_probe_point":
+            timeUTC = int(time.time())
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message, "time": str(timeUTC)}))
+        elif action == "bed_probe_data":
+            timeUTC = int(time.time())
+            json_data = json.loads(message)
+            probe_data = json.dumps(json_data["probe_data"])
+            probe_type = json_data["probe_type"]
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"probe_data": probe_data, "probe_type": probe_type, "time": str(timeUTC)}))
         else:
             self._logger.info("Unknown command: '"+str(line)+"'")
 
@@ -220,7 +228,7 @@ def _check_config_file(config_file):
 
     default = ConfigParser.SafeConfigParser()
     default.readfp(open("/etc/redeem/default.cfg"))
-    
+
     new = ConfigParser.SafeConfigParser()
     new.readfp(open(config_file))
 
@@ -257,6 +265,6 @@ def __plugin_load__():
 
     global __plugin_hooks__
     __plugin_hooks__ = {
-        "octoprint.comm.protocol.action": plugin.custom_action_handler, 
+        "octoprint.comm.protocol.action": plugin.custom_action_handler,
         "octoprint.server.http.routes": plugin.route_hook
     }

@@ -147,7 +147,7 @@ $(function() {
                 contentType: "application/json; charset=UTF-8",
                 data: JSON.stringify({
                     command: "use_profile",
-                    default: true, 
+                    default: true,
                     key: data.key
                 }),
                 success: function() {
@@ -183,7 +183,7 @@ $(function() {
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 data: JSON.stringify({
-                    command: "save_local", 
+                    command: "save_local",
                     data: $("#settings_plugin_redeem_textarea").val()
                 }),
                 success: function() {
@@ -262,6 +262,27 @@ $(function() {
                 }),
                 success: function() {
                     self.removeThermistorPopups();
+                }
+            });
+        };
+
+        // Upload and view data
+        self.uploadAndViewBedData = function(data_type, probe_data) {
+            $.ajax({
+                url:  "http://www.thing-printer.com/review/api/index.php/post_probe_data/abc",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    type: data_type,
+                    json_data: probe_data,
+                    show_mesh: true,
+                    show_markers: true
+                }),
+                success: function() {
+                    console.log("Data upload OK");
+                    window.open('http://www.thing-printer.com/review/matrix.html');
+                    self._closePopup();
                 }
             });
         };
@@ -449,11 +470,33 @@ $(function() {
                     };
                     break;
                 }
+                case "bed_probe_data":{
+                    options = {
+                        title: "Bed probe data ready",
+                        text: "Click to upload and view",
+                        type: "info",
+                        hide: false,
+                        confirm: {
+                            confirm: true,
+                            buttons: [{
+                                text: gettext("View data"),
+                                click: function () {
+                                  self.uploadAndViewBedData(messageData.probe_type, messageData.probe_data);
+                                }
+                            }]
+                        },
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        }
+                    };
+                    break;
+                }
                 case "filament_sensor":{
                     break;
                 }
             }
-            if(options !== undefined){ 
+            if(options !== undefined){
                 self._showPopup(options);
             }
         };
