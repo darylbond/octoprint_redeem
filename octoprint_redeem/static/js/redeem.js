@@ -267,9 +267,9 @@ $(function() {
         };
 
         // Upload and view data
-        self.uploadAndViewBedData = function(data_type, probe_data) {
+        self.uploadAndViewBedData = function(data_type, probe_data, replicape_key) {
             $.ajax({
-                url:  "http://www.thing-printer.com/review/api/index.php/post_probe_data/abc",
+                url:  "http://review.thing-printer.com/api/index.php/post_probe_data/"+replicape_key,
                 type: "POST",
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
@@ -281,7 +281,7 @@ $(function() {
                 }),
                 success: function() {
                     console.log("Data upload OK");
-                    window.open('http://www.thing-printer.com/review/matrix.html');
+                    window.open('http://review.thing-printer.com/?key='+replicape_key);
                     self._closePopup();
                 }
             });
@@ -481,7 +481,10 @@ $(function() {
                             buttons: [{
                                 text: gettext("View data"),
                                 click: function () {
-                                  self.uploadAndViewBedData(messageData.probe_type, messageData.probe_data);
+                                  self.uploadAndViewBedData(
+                                      messageData.probe_type,
+                                      messageData.probe_data,
+                                      messageData.replicape_key);
                                 }
                             }]
                         },

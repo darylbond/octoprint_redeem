@@ -200,11 +200,14 @@ class RedeemPlugin(
             timeUTC = int(time.time())
             self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"message": message, "time": str(timeUTC)}))
         elif action == "bed_probe_data":
-            timeUTC = int(time.time())
             json_data = json.loads(message)
-            probe_data = json.dumps(json_data["probe_data"])
-            probe_type = json_data["probe_type"]
-            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data={"probe_data": probe_data, "probe_type": probe_type, "time": str(timeUTC)}))
+            data={
+                "probe_data": json.dumps(json_data["probe_data"]),
+                "probe_type": json_data["probe_type"],
+                "replicape_key": json_data["replicape_key"],
+                "time": str(int(time.time()))
+            }
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data=data))
         else:
             self._logger.info("Unknown command: '"+str(line)+"'")
 
