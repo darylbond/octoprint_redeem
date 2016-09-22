@@ -96,6 +96,9 @@ class RedeemPlugin(
         elif command == "restart_redeem":
             o.restart_redeem()
             return flask.jsonify(ok=1)
+        elif command == "upgrade_redeem":
+            o.upgrade_current_branch()
+            return flask.jsonify(ok=1)
         elif command == "reset_alarm":
             o.reset_alarm()
             return flask.jsonify(ok=1)
@@ -204,6 +207,15 @@ class RedeemPlugin(
             data={
                 "probe_data": json.dumps(json_data["probe_data"]),
                 "probe_type": json_data["probe_type"],
+                "replicape_key": json_data["replicape_key"],
+                "time": str(int(time.time()))
+            }
+            self._plugin_manager.send_plugin_message("redeem", dict(type=action, data=data))
+        elif action == "pid_tune_data":
+            json_data = json.loads(message)
+            data={
+                "tune_data": json.dumps(json_data["tune_data"]),
+                "tune_gcode": json_data["tune_gcode"],
                 "replicape_key": json_data["replicape_key"],
                 "time": str(int(time.time()))
             }

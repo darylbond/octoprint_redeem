@@ -4,6 +4,7 @@ import subprocess
 import os
 import logging
 import logging.handlers
+import git
 
 my_logger = logging.getLogger('MyLogger')
 my_logger.setLevel(logging.DEBUG)
@@ -13,6 +14,7 @@ my_logger.addHandler(handler)
 class Operate:
     def __init__(self):
         self.path = "/etc/redeem/"
+        self.git = git.Git("/usr/src/redeem")
 
     def get_printers(self):
         """ Get a list of config files """
@@ -73,4 +75,33 @@ class Operate:
     def reset_alarm(self):
         # Send M562 to reset the thermistor alarm
         subprocess.call("echo 'M562' > /dev/testing_noret_1", shell=True)
+
+    #
+    # Git repository functions
+    #
+    def upgrade_current_branch(self):
+        ''' Upgrades the current branch and '''
+        cn = self.get_current_branch()
+        local = self.repo.head.ref
+        remote = self.repo.remotes.origin.refs[cn]
+        self.repo.merge_base(local_remote)
+        subprocess.call("make install", shell=True)
+        self.restart_redeem()
+
+    def current_branch_upgradable(self):
+        ''' Return true if the current branch can be upgraded'''
+        cn = self.get_current_branch()
+        self.repo.remotes.origin.fetch()
+        return self.repo.head.commit != self.repo.remotes.origin.refs[cn].commit
+
+    def get_heads(self):
+        return [head.name for head in r.heads]
+
+    def checkout(self, branch):
+        self.repo.heads[branch].checkout()
+
+    def get_current_branch(self):
+        return self.repo.head.ref.name
+
+
 
