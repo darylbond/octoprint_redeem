@@ -176,6 +176,23 @@ $(function() {
             $("#settings_plugin_redeem_editor").modal("show");
         };
 
+        self.showEditDefaultDialog = function() {
+            $.ajax({
+                url:  API_BASEURL + "plugin/redeem",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    command: "get_default"
+                }),
+                success: function(data) {
+                    $("#settings_plugin_redeem_textarea_viewer").val(data["data"]);
+                }
+            });
+            $("#settings_plugin_redeem_viewer").modal("show");
+        };
+
+
         self.saveLocal = function() {
             $.ajax({
                 url:  API_BASEURL + "plugin/redeem",

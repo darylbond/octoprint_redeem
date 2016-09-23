@@ -14,7 +14,6 @@ my_logger.addHandler(handler)
 class Operate:
     def __init__(self):
         self.path = "/etc/redeem/"
-        self.repo = git.Repo("/usr/src/redeem")
 
     def get_printers(self):
         """ Get a list of config files """
@@ -56,15 +55,17 @@ class Operate:
         return False        
 
     def get_local(self, filename):
-        with open(filename, "r+") as f:
-            return f.read()
+        try: 
+            with open(filename, "r+") as f:
+                return f.read()
+        except IOError as e:
+            return 'Error: Cannot open '+filename
 
     def save_local(self, data, filename):
         logging.info(data)
         with open(filename, "w+") as f:
             f.write(data)
         
-
     def restart_redeem(self):
         # Octo will need to have sudo privileges to restart redeem for this to work. 
         # Add "%octo ALL=NOPASSWD: /bin/systemctl restart redeem.service" to /etc/sudoers
@@ -75,42 +76,6 @@ class Operate:
     def reset_alarm(self):
         # Send M562 to reset the thermistor alarm
         subprocess.call("echo 'M562' > /dev/testing_noret_1", shell=True)
-
-    #
-    # Git repository functions
-    #
-    def upgrade_current_branch(self):
-        ''' Upgrades the current branch and '''
-        cn = self.get_current_branch()
-        local = self.repo.head.ref
-        remote = self.repo.remotes.origin.refs[cn]
-        self.repo.merge_base(local, remote)
-        install_ok = subprocess.call("sudo /usr/bin/make -C /usr/src/redeem install", shell=True)
-        if install_ok: 
-            self.restart_redeem()
-        return {"installation_ok": install_ok}
-
-    def is_current_branch_upgradable(self):
-        ''' Return true if the current branch can be upgraded'''
-        cn = self.get_current_branch()
-        self.repo.remotes.origin.fetch()
-        local = self.repo.head.ref
-        remote = self.repo.remotes.origin.refs[cn]
-        data = {
-            "local_version": local.commit.hexsha,
-            "remote_version": remote.commit.hexsha,
-            "is_upgradable": self.repo.head.commit != self.repo.remotes.origin.refs[cn].commit
-        }
-        return data
-
-    def get_branches(self):
-        return [head.name for head in self.repo.heads]
-
-    def set_current_branch(self, branch):
-        self.repo.heads[branch].checkout()
-
-    def get_current_branch(self):
-        return self.repo.head.ref.name
 
 
 if __name__ == "__main__":

@@ -79,6 +79,7 @@
             <td class="settings_plugin_redeem_profiles_key"><span class="icon-star" data-bind="invisible: true"></span><span data-bind="text: 'default'"></span></td>
             <td class="settings_plugin_redeem_profiles_name">default.cfg</td>
             <td class="settings_plugin_redeem_profiles_actions">
+                <a href="#" class="icon-edit" title="{{ _('View Profile') }}" data-bind="click: function() { $root.showEditDefaultDialog() }"></a>
                 <a href="#" class="icon-download" title="{{ _('Download Profile') }}" data-bind="attr: {href: '/plugin/redeem/download/default.cfg'}"></a>
             </td>
         </tr>
@@ -93,18 +94,6 @@
             <button class="btn pull-left" data-bind="click: function() { $root.restartRedeem() }">{{ _('Restart redeem') }}</button>
     </tbody>
 </table>
-
-
-<div class="pull-right">
-    <button class="btn btn-small pull-right" data-bind="click: function() { $root.configureUpdates(); }" title="{{ _('Update Configuration') }}"><i class="icon-wrench"></i></button>
-</div>
-<h4>{{ _('Software update') }}</h4>
-<p>
-    Redeem is installed from <a href="https://bitbucket.org/intelligentagent/redeem">a repository</a>. To update to the latest version, 
-    click the button below
-</p> 
-<button class="btn btn-primary btn-block" data-bind="click: function() { $root.checkForUpdates(); }">{{ _('Check for update now') }}</button>
-
 
 <div id="settings_plugin_redeem_import" class="modal hide fade">
     <div class="modal-header">
@@ -163,7 +152,7 @@
 <div id="settings_plugin_redeem_editor" class="modal hide fade">
     <div class="modal-header">
         <a href="#" class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
-        <h3>{{ _('Editor for local.cfg') }}</h3>
+        <h3>{{ _('Editor for local config') }}</h3>
     </div>
     <div class="modal-body">
         <form class="form-horizontal">
@@ -175,7 +164,22 @@
         <button class="btn" data-dismiss="modal" aria-hidden="true">{{ _('Abort') }}</button>
         <button class="btn btn-primary" data-bind="click: function() { $root.saveLocal() }">{{ _('Save changes') }}</button>
     </div>
-
 </div>
 
+
+<div id="settings_plugin_redeem_viewer" class="modal hide fade">
+    <div class="modal-header">
+        <a href="#" class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
+        <h3>{{ _('Viewer for default config') }}</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal">
+            <textarea id="settings_plugin_redeem_textarea_viewer" style="width: 514px; height: 368px;">
+            </textarea> 
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">{{ _('Close') }}</button>
+    </div>
+</div>
 
