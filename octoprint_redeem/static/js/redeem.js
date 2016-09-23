@@ -203,9 +203,80 @@ $(function() {
                     command: "restart_redeem"
                 }),
                 success: function() {
+                    options = {
+                        title: "Redeem restarted",
+                        text: "Please press connect",
+                        type: "info"
+                    };
+                    self._showPopup(options);
                 }
             });
         };
+
+        /* Upgrade Redeem */
+        self.upgradeRedeem = function() {
+            $.ajax({
+                url:  API_BASEURL + "plugin/redeem",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    command: "redeem_upgrade_current_branch"
+                }),
+                success: function() {
+                    options = {
+                        title: "Redeem upgraded",
+                        text: "Please press connect",
+                        type: "info"
+                    };
+                    self._showPopup(options);
+                }
+            });
+        };
+
+        /* Check for software updates */
+        self.checkForUpdates = function() {
+            $.ajax({
+                url:  API_BASEURL + "plugin/redeem",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    command: "redeem_is_current_branch_upgradable"
+                }),
+                success: function(ret) {
+                    data = ret.data
+                    console.log(data)
+                    console.log(data["is_upgradable"])
+                    if(data["is_upgradable"]){
+                        options = {
+                            title: "A new version is available",
+                            text: "Current version: "+data["local_version"]+"<br>Avaliable upgrade: "+data["remote_version"],
+                            type: "info",
+                            hide: false,
+                            confirm: {
+                                confirm: true,
+                                buttons: [{
+                                    text: gettext("Upgrade now"),
+                                    click: function () {
+                                        self.upgradeRedeem();
+                                    }
+                                }]
+                            },
+                        };
+                    }
+                    else{
+                        options = {
+                            title: "Redeem is up to date",
+                            text: "Current version is "+data["local_version"],
+                            type: "success"
+                        };
+                    }
+                    self._showPopup(options);
+                }
+            });
+        };
+
 
         self.requestData = function() {
             $.ajax({
@@ -443,7 +514,7 @@ $(function() {
                         type: "error",
                         hide: false,
                         buttons: {
-                            closer: false,
+                            closer: true,
                             sticker: false
                         }
                     };
@@ -489,7 +560,19 @@ $(function() {
                             }]
                         },
                         buttons: {
-                            closer: false,
+                            closer: true,
+                            sticker: false
+                        }
+                    };
+                    break;
+                }
+                case "software_update_ready":{
+                    options = {
+                        title: "New Redeem software available",
+                        text: messageData.message,
+                        type: "info", 
+                        buttons: {
+                            closer: true,
                             sticker: false
                         }
                     };

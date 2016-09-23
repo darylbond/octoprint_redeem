@@ -14,7 +14,7 @@ my_logger.addHandler(handler)
 class Operate:
     def __init__(self):
         self.path = "/etc/redeem/"
-        self.git = git.Git("/usr/src/redeem")
+        self.repo = git.Repo("/usr/src/redeem")
 
     def get_printers(self):
         """ Get a list of config files """
@@ -84,24 +84,40 @@ class Operate:
         cn = self.get_current_branch()
         local = self.repo.head.ref
         remote = self.repo.remotes.origin.refs[cn]
-        self.repo.merge_base(local_remote)
-        subprocess.call("make install", shell=True)
-        self.restart_redeem()
+        self.repo.merge_base(local, remote)
+        install_ok = subprocess.call("sudo /usr/bin/make -C /usr/src/redeem install", shell=True)
+        if install_ok: 
+            self.restart_redeem()
+        return {"installation_ok": install_ok}
 
-    def current_branch_upgradable(self):
+    def is_current_branch_upgradable(self):
         ''' Return true if the current branch can be upgraded'''
         cn = self.get_current_branch()
         self.repo.remotes.origin.fetch()
-        return self.repo.head.commit != self.repo.remotes.origin.refs[cn].commit
+        local = self.repo.head.ref
+        remote = self.repo.remotes.origin.refs[cn]
+        data = {
+            "local_version": local.commit.hexsha,
+            "remote_version": remote.commit.hexsha,
+            "is_upgradable": self.repo.head.commit != self.repo.remotes.origin.refs[cn].commit
+        }
+        return data
 
-    def get_heads(self):
-        return [head.name for head in r.heads]
+    def get_branches(self):
+        return [head.name for head in self.repo.heads]
 
-    def checkout(self, branch):
+    def set_current_branch(self, branch):
         self.repo.heads[branch].checkout()
 
     def get_current_branch(self):
         return self.repo.head.ref.name
 
 
+if __name__ == "__main__":
+    o = Operate()
+    print o.get_branches()
+    print o.set_current_branch("develop")
+    print o.get_current_branch()
+    print o.current_branch_upgradable()
+    #print o.upgrade_current_branch()
 

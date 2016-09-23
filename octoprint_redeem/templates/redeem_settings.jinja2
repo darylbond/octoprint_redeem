@@ -1,8 +1,7 @@
-<h4>{{ _('General') }}</h4>
+<h4>{{ _('Redeem Plugin') }}</h4>
 
 <p>
-    The output from redeem can be found in the "Logs" section over there <-. <br>
-    If you want to increase the log level, use M-code M111
+    This plugin controls Redeem, which is the firmware for controlling your 3D-printer. 
 </p>
 <p>
     The following section has all the printer configurations that are installed. 
@@ -17,6 +16,8 @@
 <p>
     For more info, see the <a href="http://wiki.thing-printer.com/index.php?title=Redeem#Configuration">wiki page for redeem</a>.    
 </p>
+
+
 <h4>{{ _('Profiles') }}</h4>
 <table class="table table-striped table-hover table-condensed table-hover">
     <tbody >
@@ -85,8 +86,25 @@
 </table>
 
 
-<button class="btn pull-right" data-bind="click: function() { $root.showImportProfileDialog() }">{{ _('Import Profile...') }}</button>
-<button class="btn pull-left" data-bind="click: function() { $root.restartRedeem() }">{{ _('Restart redeem') }}</button>
+<table class="table table-striped table-hover table-condensed table-hover">
+    <tbody >
+        <tr>
+            <button class="btn pull-right" data-bind="click: function() { $root.showImportProfileDialog() }">{{ _('Import Profile...') }}</button>
+            <button class="btn pull-left" data-bind="click: function() { $root.restartRedeem() }">{{ _('Restart redeem') }}</button>
+    </tbody>
+</table>
+
+
+<div class="pull-right">
+    <button class="btn btn-small pull-right" data-bind="click: function() { $root.configureUpdates(); }" title="{{ _('Update Configuration') }}"><i class="icon-wrench"></i></button>
+</div>
+<h4>{{ _('Software update') }}</h4>
+<p>
+    Redeem is installed from <a href="https://bitbucket.org/intelligentagent/redeem">a repository</a>. To update to the latest version, 
+    click the button below
+</p> 
+<button class="btn btn-primary btn-block" data-bind="click: function() { $root.checkForUpdates(); }">{{ _('Check for update now') }}</button>
+
 
 <div id="settings_plugin_redeem_import" class="modal hide fade">
     <div class="modal-header">

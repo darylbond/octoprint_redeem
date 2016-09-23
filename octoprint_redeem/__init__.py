@@ -60,6 +60,11 @@ class RedeemPlugin(
             use_profile = [],
             delete_profile = [],
             restart_redeem = [],
+            redeem_upgrade_current_branch = [],
+            redeem_is_current_branch_upgradable = [],
+            redeem_get_current_branch = [],
+            redeem_set_current_branch = [],
+            redeem_get_branches = [],
             reset_alarm = [],
             get_local = [],
             save_local = []
@@ -96,9 +101,22 @@ class RedeemPlugin(
         elif command == "restart_redeem":
             o.restart_redeem()
             return flask.jsonify(ok=1)
-        elif command == "upgrade_redeem":
-            o.upgrade_current_branch()
+        elif command == "redeem_upgrade_current_branch":
+            data = o.upgrade_current_branch()
+            return flask.jsonify(data = data)
+        elif command == "redeem_is_current_branch_upgradable":
+            data = o.is_current_branch_upgradable()
+            return flask.jsonify(data=data)
+        elif command == "redeem_get_current_branch":
+            data = o.get_current_branch()
+            return flask.jsonify(data=data)
+        elif command == "redeem_set_current_branch":
+            branchname = data["key"]
+            o.set_current_branch(branchname)
             return flask.jsonify(ok=1)
+        elif command == "redeem_get_branches":
+            data = o.get_branches()
+            return flask.jsonify(data=data)
         elif command == "reset_alarm":
             o.reset_alarm()
             return flask.jsonify(ok=1)
