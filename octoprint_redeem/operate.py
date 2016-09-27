@@ -4,7 +4,6 @@ import subprocess
 import os
 import logging
 import logging.handlers
-import git
 
 my_logger = logging.getLogger('MyLogger')
 my_logger.setLevel(logging.DEBUG)
