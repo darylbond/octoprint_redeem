@@ -66,8 +66,7 @@ class RedeemPlugin(
             redeem_set_current_branch = [],
             redeem_get_branches = [],
             reset_alarm = [],
-            get_local = [],
-            get_default = [],
+            get_profile = [],
             save_local = []
         )
 
@@ -121,13 +120,10 @@ class RedeemPlugin(
         elif command == "reset_alarm":
             o.reset_alarm()
             return flask.jsonify(ok=1)
-        elif command == "get_local":
-            filename = os.path.join(self._settings.get(["path"]),"local.cfg")
-            data = o.get_local(filename)
-            return flask.jsonify(data=data)
-        elif command == "get_default":
-            filename = os.path.join(self._settings.get(["path"]),"default.cfg")
-            data = o.get_local(filename)
+        elif command == "get_profile":
+            filename = data["key"]
+            filename_path = os.path.join(self._settings.get(["path"]),filename)
+            data = o.get_config_file(filename_path)
             return flask.jsonify(data=data)
         elif command == "save_local":
             filename = os.path.join(self._settings.get(["path"]),"local.cfg")

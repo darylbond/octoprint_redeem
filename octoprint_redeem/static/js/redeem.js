@@ -167,7 +167,8 @@ $(function() {
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 data: JSON.stringify({
-                    command: "get_local"
+                    command: "get_profile",
+                    key: "local.cfg"
                 }),
                 success: function(data) {
                     $("#settings_plugin_redeem_textarea").val(data["data"]);
@@ -176,19 +177,22 @@ $(function() {
             $("#settings_plugin_redeem_editor").modal("show");
         };
 
-        self.showEditDefaultDialog = function() {
+        self.showViewProfileDialog = function(filename) {
             $.ajax({
                 url:  API_BASEURL + "plugin/redeem",
                 type: "POST",
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 data: JSON.stringify({
-                    command: "get_default"
+                    command: "get_profile",
+                    key: filename
                 }),
                 success: function(data) {
+                    
                     $("#settings_plugin_redeem_textarea_viewer").val(data["data"]);
                 }
             });
+            $("#settings_plugin_redeem_config_viewer").text('Viewer for config file '+filename);
             $("#settings_plugin_redeem_viewer").modal("show");
         };
 

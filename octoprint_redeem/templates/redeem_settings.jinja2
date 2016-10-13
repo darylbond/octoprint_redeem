@@ -54,6 +54,7 @@
             <td class="settings_plugin_redeem_profiles_actions">
                 <a href="#" class="icon-star" title="{{ _('Make default') }}" data-bind="enable: !isdefault(), css: {disabled: isdefault()}, click: function() { if (!$data.isdefault()) { $root.makeProfileDefault($data); } }"></a>&nbsp;|&nbsp;
                 <a href="#" class="icon-trash" title="{{ _('Delete Profile') }}" data-bind="enable: !isdefault(), css: {disabled: isdefault()}, click: function() { if (!$data.isdefault()) { $root.removeProfile($data); } }"></a>&nbsp;|&nbsp;
+                <a href="#" class="icon-eye-open" title="{{ _('View Profile') }}" data-bind="click: function() { $root.showViewProfileDialog($data['key']) }"></a>&nbsp;|&nbsp;
                 <a href="#" class="icon-download" title="{{ _('Download Profile') }}" data-bind="attr: {href: refs.download}"></a>
             </td>
         </tr>
@@ -79,7 +80,7 @@
             <td class="settings_plugin_redeem_profiles_key"><span class="icon-star" data-bind="invisible: true"></span><span data-bind="text: 'default'"></span></td>
             <td class="settings_plugin_redeem_profiles_name">default.cfg</td>
             <td class="settings_plugin_redeem_profiles_actions">
-                <a href="#" class="icon-edit" title="{{ _('View Profile') }}" data-bind="click: function() { $root.showEditDefaultDialog() }"></a>
+                <a href="#" class="icon-eye-open" title="{{ _('View Profile') }}" data-bind="click: function() { $root.showViewProfileDialog('default.cfg') }"></a>&nbsp;|&nbsp;
                 <a href="#" class="icon-download" title="{{ _('Download Profile') }}" data-bind="attr: {href: '/plugin/redeem/download/default.cfg'}"></a>
             </td>
         </tr>
@@ -170,7 +171,7 @@
 <div id="settings_plugin_redeem_viewer" class="modal hide fade">
     <div class="modal-header">
         <a href="#" class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
-        <h3>{{ _('Viewer for default config') }}</h3>
+        <h3 id="settings_plugin_redeem_config_viewer">{{ _('Viewer for config file') }}</h3>
     </div>
     <div class="modal-body">
         <form class="form-horizontal">

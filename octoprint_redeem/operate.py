@@ -53,8 +53,13 @@ class Operate:
             return True
         return False        
 
-    def get_local(self, filename):
-        try: 
+    def get_config_file(self, filename):
+        whitelist = self.get_printers()
+        whitelist.append("default.cfg")
+        whitelist.append("local.cfg")
+        if os.path.basename(filename) not in whitelist:
+            return "Error: Filename not whitelisted"
+        try:
             with open(filename, "r+") as f:
                 return f.read()
         except IOError as e:
