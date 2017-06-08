@@ -65,7 +65,8 @@ class RedeemPlugin(
             redeem_get_current_branch = [],
             redeem_set_current_branch = [],
             redeem_get_branches = [],
-            reset_alarm = [],
+            reset_thermistor_alarm = [],
+            reset_endstop_alarm = [],
             get_profile = [],
             save_local = []
         )
@@ -117,8 +118,11 @@ class RedeemPlugin(
         elif command == "redeem_get_branches":
             data = o.get_branches()
             return flask.jsonify(data=data)
-        elif command == "reset_alarm":
-            o.reset_alarm()
+        elif command == "reset_thermistor_alarm":
+            o.reset_thermistor_alarm()
+            return flask.jsonify(ok=1)
+        elif command == "reset_endstop_alarm":
+            o.reset_endstop_alarm()
             return flask.jsonify(ok=1)
         elif command == "get_profile":
             filename = data["key"]

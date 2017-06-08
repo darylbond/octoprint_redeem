@@ -337,7 +337,7 @@ $(function() {
         self.onAfterBinding = function () {
         };
 
-        self.removeThermistorPopups = function(){
+        self.removePopups = function(){
             console.log("Remove popups");
             self._closePopup();
         };
@@ -350,10 +350,26 @@ $(function() {
                 dataType: "json",
                 contentType: "application/json; charset=UTF-8",
                 data: JSON.stringify({
-                    command: "reset_alarm"
+                    command: "reset_thermistor_alarm"
                 }),
                 success: function() {
-                    self.removeThermistorPopups();
+                    self.removePopups();
+                }
+            });
+        };
+
+        // Reset the endstop alarm
+        self.resetEndstopAlarm = function() {
+            $.ajax({
+                url:  API_BASEURL + "plugin/redeem",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    command: "reset_endstop_alarm"
+                }),
+                success: function() {
+                    self.removePopups(); // TODO
                 }
             });
         };
@@ -518,6 +534,28 @@ $(function() {
                                 text: gettext("Reset alarm"),
                                 click: function () {
                                     self.resetThermistorAlarm();
+                                }
+                            }]
+                        },
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        },
+                    };
+                    break;
+                }
+                case "alarm_endstop_hit":{
+                    options = {
+                        title: "Endstop hit unexpectedly!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        confirm: {
+                            confirm: true,
+                            buttons: [{
+                                text: gettext("Reset alarm"),
+                                click: function () {
+                                    self.resetEndstopAlarm();
                                 }
                             }]
                         },

@@ -77,9 +77,13 @@ class Operate:
         subprocess.call("sudo systemctl restart redeem.service", shell=True)
 
 
-    def reset_alarm(self):
+    def reset_thermistor_alarm(self):
         # Send M562 to reset the thermistor alarm
         subprocess.call("echo 'M562' > /dev/testing_noret_1", shell=True)
+
+    def reset_endstop_alarm(self):
+        # Send M19 to reset the endstop alarm
+        subprocess.call("echo 'M19' > /dev/testing_noret_1", shell=True)
 
 
 if __name__ == "__main__":
