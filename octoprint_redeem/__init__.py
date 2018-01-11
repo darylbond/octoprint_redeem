@@ -261,22 +261,10 @@ class RedeemPlugin(
 
 
 def _check_config_file(config_file):
-    import ConfigParser
+    from configobj import ConfigObj
     import logging
 
-    default = ConfigParser.SafeConfigParser()
-    default.readfp(open("/etc/redeem/default.cfg"))
-
-    new = ConfigParser.SafeConfigParser()
-    new.readfp(open(config_file))
-
-    # Get list of changed values
-    for section in new.sections():
-        if not default.has_section(section):
-            logging.warning("Unknown section in file: {}".format(section))
-        for option in new.options(section):
-            if not default.has_option(section, option):
-                logging.warning("Unknown option in file: {} in {}".format(option, section))
+    ConfigObj(config_file, list_values=False)
 
     return True
 
