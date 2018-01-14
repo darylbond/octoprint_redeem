@@ -522,6 +522,28 @@ $(function() {
                     };
                     break;
                 }
+                case "alarm_heater_rising_slow":{
+                    options = {
+                        title: "Un-attached sensor!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        confirm: {
+                            confirm: true,
+                            buttons: [{
+                                text: gettext("Reset alarm"),
+                                click: function () {
+                                    self.resetThermistorAlarm();
+                                }
+                            }]
+                        },
+                        buttons: {
+                            closer: false,
+                            sticker: false
+                        }
+                    };
+                    break;
+                }
                 case "alarm_heater_falling_fast":{
                     options = {
                         title: "Heater falling fast!",
@@ -588,6 +610,19 @@ $(function() {
                         buttons: {
                             closer: true,
                             sticker: true
+                        }
+                    };
+                    break;
+                }
+                case "alarm_config_error":{
+                    options = {
+                        title: "Configuration Error!",
+                        text: messageData.message,
+                        type: "error",
+                        hide: false,
+                        buttons: {
+                            closer: false,
+                            sticker: false
                         }
                     };
                     break;
