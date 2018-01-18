@@ -374,6 +374,22 @@ $(function() {
             });
         };
 
+        // Reset all alarms
+        self.resetAllAlarms = function() {
+            $.ajax({
+                url:  API_BASEURL + "plugin/redeem",
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json; charset=UTF-8",
+                data: JSON.stringify({
+                    command: "reset_all_alarm"
+                }),
+                success: function() {
+                    self.removePopups(); // TODO
+                }
+            });
+        };
+
         // Upload and view data
         self.uploadAndViewBedData = function(data_type, probe_data, replicape_key) {
             $.ajax({
@@ -445,7 +461,7 @@ $(function() {
                             buttons: [{
                                 text: gettext("Reset alarm"),
                                 click: function () {
-                                    self.resetThermistorAlarm();
+                                    self.resetAllAlarms();
                                 }
                             }]
                         },
@@ -467,7 +483,7 @@ $(function() {
                             buttons: [{
                                 text: gettext("Reset alarm"),
                                 click: function () {
-                                    self.resetThermistorAlarm();
+                                    self.resetAllAlarms();
                                 }
                             }]
                         },
@@ -489,7 +505,7 @@ $(function() {
                             buttons: [{
                                 text: gettext("Reset alarm"),
                                 click: function () {
-                                    self.resetThermistorAlarm();
+                                    self.resetAllAlarms();
                                 }
                             }]
                         },
@@ -511,7 +527,7 @@ $(function() {
                             buttons: [{
                                 text: gettext("Reset alarm"),
                                 click: function () {
-                                    self.resetThermistorAlarm();
+                                    self.resetAllAlarms();
                                 }
                             }]
                         },
@@ -524,7 +540,7 @@ $(function() {
                 }
                 case "alarm_heater_rising_slow":{
                     options = {
-                        title: "Un-attached sensor!",
+                        title: "Unattached sensor!",
                         text: messageData.message,
                         type: "error",
                         hide: false,
@@ -577,7 +593,7 @@ $(function() {
                             buttons: [{
                                 text: gettext("Reset alarm"),
                                 click: function () {
-                                    self.resetEndstopAlarm();
+                                    self.resetAllAlarms();
                                 }
                             }]
                         },

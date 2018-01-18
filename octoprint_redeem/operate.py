@@ -84,6 +84,10 @@ class Operate:
     def reset_endstop_alarm(self):
         # Send M19 to reset the endstop alarm
         subprocess.call("echo 'M19' > /dev/testing_noret_1", shell=True)
+        
+    def reset_all_alarm(self):
+        self.reset_endstop_alarm()
+        self.reset_thermistor_alarm()
 
 
 if __name__ == "__main__":
